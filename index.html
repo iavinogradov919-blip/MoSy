@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Форма">
+<meta name="theme-color" content="#0f1226">
+<title>Моя Форма — трекер</title>
+<style>
+  :root{
+    --bg:#0f1226;
+    --bg2:#171a36;
+    --card:#1d2147;
+    --card2:#252a5c;
+    --accent:#6c8cff;
+    --accent2:#9b6cff;
+    --good:#34d399;
+    --bad:#fb7185;
+    --warn:#fbbf24;
+    --text:#eef0ff;
+    --muted:#9aa0c7;
+    --line:rgba(255,255,255,.08);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(1200px 600px at 80% -10%, #20254f 0%, transparent 60%),
+               radial-gradient(900px 500px at -10% 10%, #2a1f4f 0%, transparent 55%),
+               var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:540px;margin:0 auto;padding:16px 16px 120px}
+
+  /* ===== Заголовок / Форма ===== */
+  .hero{
+    background:linear-gradient(160deg,var(--card),var(--bg2));
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:20px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 20px 40px -20px rgba(0,0,0,.6);
+  }
+  .hero h1{margin:0;font-size:15px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+  .score-row{display:flex;align-items:flex-end;gap:14px;margin-top:6px}
+  .score{font-size:64px;font-weight:800;line-height:1;letter-spacing:-2px}
+  .level-badge{
+    margin-left:auto;text-align:center;background:rgba(108,140,255,.15);
+    border:1px solid rgba(108,140,255,.35);border-radius:16px;padding:10px 14px;
+  }
+  .level-badge .lv{font-size:11px;color:var(--muted)}
+  .level-badge .lvnum{font-size:26px;font-weight:800;color:var(--accent)}
+  .rank{margin-top:10px;font-size:15px;font-weight:600}
+  .rank .emoji{font-size:18px}
+  .progress{margin-top:14px;height:10px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+  .progress > i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .hero-meta{display:flex;gap:18px;margin-top:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+  .hero-meta b{color:var(--text)}
+
+  /* ===== Дата-бар ===== */
+  .datebar{display:flex;align-items:center;justify-content:space-between;margin:18px 4px 10px}
+  .datebar .nav{display:flex;gap:8px}
+  .datebar button{
+    background:var(--card);border:1px solid var(--line);color:var(--text);
+    width:38px;height:38px;border-radius:12px;font-size:18px;cursor:pointer;
+  }
+  .datebar .label{font-size:16px;font-weight:700}
+  .datebar .sub{font-size:12px;color:var(--muted)}
+  .datebar button:active{transform:scale(.92)}
+
+  /* ===== Задачи ===== */
+  .section-title{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 4px 8px;font-weight:700}
+  .tasks{display:flex;flex-direction:column;gap:10px}
+  .task{
+    display:flex;align-items:center;gap:12px;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px;transition:transform .12s, background .2s, opacity .2s;
+  }
+  .task:active{transform:scale(.99)}
+  .task .ico{
+    width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-size:22px;background:var(--card2);flex:0 0 auto;
+  }
+  .task .body{flex:1;min-width:0}
+  .task .name{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .task .pts{font-size:12px;color:var(--muted);margin-top:2px}
+  .task .pts .plus{color:var(--good)}
+  .task .pts .minus{color:var(--bad)}
+  .check{
+    width:34px;height:34px;border-radius:50%;border:2px solid var(--muted);
+    flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    font-size:18px;color:transparent;transition:all .2s;cursor:pointer;
+  }
+  .task.done{background:linear-gradient(160deg,rgba(52,211,153,.12),var(--card))}
+  .task.done .check{background:var(--good);border-color:var(--good);color:#05281c}
+  .task.done .name{color:var(--good)}
+  .task.skipped{background:linear-gradient(160deg,rgba(251,113,133,.10),var(--card));opacity:.9}
+  .task.skipped .check{border-color:var(--bad);color:var(--bad)}
+  .task.skipped .name{text-decoration:line-through;color:var(--muted)}
+  .task .del{background:none;border:none;color:var(--muted);font-size:18px;padding:6px;cursor:pointer;opacity:.5}
+  .task .del:active{opacity:1}
+
+  .hint{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
+
+  /* ===== Добавление ===== */
+  .add-row{display:flex;gap:8px;margin-top:12px}
+  .add-row input{
+    flex:1;background:var(--card);border:1px solid var(--line);color:var(--text);
+    border-radius:14px;padding:14px;font-size:16px;outline:none;
+  }
+  .add-row input:focus{border-color:var(--accent)}
+  .add-row button{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;
+    border-radius:14px;padding:0 18px;font-size:24px;font-weight:700;cursor:pointer;
+  }
+
+  /* ===== Кнопки действий ===== */
+  .actions{display:flex;gap:10px;margin-top:18px}
+  .actions button{
+    flex:1;border-radius:14px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;border:1px solid var(--line);
+    background:var(--card);color:var(--text);
+  }
+  .actions .danger{color:var(--bad)}
+  .actions button:active{transform:scale(.97)}
+
+  /* ===== Полоска недели ===== */
+  .week{display:flex;gap:6px;margin-top:14px}
+  .week .day{flex:1;text-align:center}
+  .week .day .d{font-size:11px;color:var(--muted);margin-bottom:6px}
+  .week .day .bar{height:46px;border-radius:8px;background:rgba(255,255,255,.06);display:flex;align-items:flex-end;overflow:hidden}
+  .week .day .bar > i{display:block;width:100%;background:linear-gradient(180deg,var(--accent),var(--accent2));transition:height .4s}
+  .week .day.today .d{color:var(--accent);font-weight:700}
+
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);
+    background:var(--card2);border:1px solid var(--line);color:var(--text);
+    padding:12px 18px;border-radius:14px;font-weight:600;font-size:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);opacity:0;transition:all .3s;z-index:50;pointer-events:none;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+  .empty{text-align:center;color:var(--muted);padding:24px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ФОРМА -->
+  <div class="hero">
+    <h1>Моя форма</h1>
+    <div class="score-row">
+      <div class="score" id="score">0</div>
+      <div class="level-badge">
+        <div class="lv">Уровень</div>
+        <div class="lvnum" id="levelNum">1</div>
+      </div>
+    </div>
+    <div class="rank" id="rank"><span class="emoji">🌱</span> Новичок</div>
+    <div class="progress"><i id="progressBar" style="width:0%"></i></div>
+    <div class="hero-meta">
+      <span>🔥 Серия: <b id="streak">0</b> дн.</span>
+      <span>✅ Сегодня: <b id="todayDone">0</b></span>
+      <span>📊 Всего очков: <b id="totalPts">0</b></span>
+    </div>
+    <div class="week" id="week"></div>
+  </div>
+
+  <!-- ДАТА -->
+  <div class="datebar">
+    <div>
+      <div class="label" id="dateLabel">Сегодня</div>
+      <div class="sub" id="dateSub"></div>
+    </div>
+    <div class="nav">
+      <button id="prevDay">‹</button>
+      <button id="nextDay">›</button>
+    </div>
+  </div>
+
+  <!-- ЗАДАЧИ -->
+  <div class="section-title">Задачи дня</div>
+  <div class="tasks" id="tasks"></div>
+  <div class="hint">Тап по кружку: ✔ выполнено (+) · ещё тап: ✗ пропущено (−) · ещё тап: сброс</div>
+
+  <div class="add-row">
+    <input id="newTask" type="text" placeholder="Новая задача (напр. Зарядка)" maxlength="40">
+    <button id="addBtn">+</button>
+  </div>
+
+  <div class="actions">
+    <button id="resetDay">Сброс дня</button>
+    <button id="resetAll" class="danger">Сброс всего</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= Данные ================= */
+const STORE_KEY = 'myForm_v1';
+
+// Очки по умолчанию: выполнил +1, пропустил -3
+const PTS_DONE = 1;
+const PTS_SKIP = -3;
+
+const DEFAULT_TASKS = [
+  {id:'t1', name:'Зарядка / спорт', icon:'🏋️'},
+  {id:'t2', name:'8000+ шагов', icon:'🚶'},
+  {id:'t3', name:'2л воды', icon:'💧'},
+  {id:'t4', name:'Здоровая еда', icon:'🥗'},
+  {id:'t5', name:'Сон 7-8 ч', icon:'😴'},
+  {id:'t6', name:'Без сахара/фастфуда', icon:'🚫'},
+];
+
+// Ранги по уровню
+const RANKS = [
+  {min:0,  name:'Новичок',     emoji:'🌱'},
+  {min:5,  name:'Любитель',    emoji:'🙂'},
+  {min:10, name:'В тонусе',    emoji:'💪'},
+  {min:18, name:'Атлет',       emoji:'🔥'},
+  {min:28, name:'Машина',      emoji:'⚡'},
+  {min:40, name:'Легенда',     emoji:'👑'},
+];
+
+let data = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {
+    tasks: DEFAULT_TASKS.slice(),
+    // log: { '2026-06-03': { taskId: 'done'|'skip' } }
+    log: {},
+  };
+}
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+
+/* ================= Дата ================= */
+let viewDate = new Date();
+function dkey(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function isSameDay(a,b){ return dkey(a)===dkey(b); }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+
+/* ================= Подсчёт очков ================= */
+// Очки за один день
+function dayPoints(key){
+  const day = data.log[key];
+  if(!day) return 0;
+  let p=0;
+  for(const id in day){
+    if(day[id]==='done') p+=PTS_DONE;
+    else if(day[id]==='skip') p+=PTS_SKIP;
+  }
+  return p;
+}
+// Суммарные очки за всё время = "Форма" (не уходит ниже 0)
+function totalPoints(){
+  let p=0;
+  for(const key in data.log) p += dayPoints(key);
+  return p;
+}
+function levelFromScore(score){
+  // каждые 10 очков = уровень
+  return Math.max(1, Math.floor(score/10)+1);
+}
+function rankFor(level){
+  let r = RANKS[0];
+  for(const x of RANKS){ if(level>=x.min) r=x; }
+  return r;
+}
+// Серия дней подряд, где набрано >0 очков
+function streak(){
+  let s=0;
+  let d=new Date();
+  // если сегодня ещё ничего нет — начинаем со вчера
+  if(dayPoints(dkey(d))<=0) d=addDays(d,-1);
+  while(dayPoints(dkey(d))>0){ s++; d=addDays(d,-1); }
+  return s;
+}
+
+/* ================= Рендер ================= */
+const $ = id => document.getElementById(id);
+
+function render(){
+  const total = totalPoints();
+  const score = Math.max(0,total);
+  const level = levelFromScore(score);
+  const rank = rankFor(level);
+  const inLevel = score % 10;
+
+  $('score').textContent = score;
+  $('totalPts').textContent = total;
+  $('levelNum').textContent = level;
+  $('rank').innerHTML = `<span class="emoji">${rank.emoji}</span> ${rank.name}`;
+  $('progressBar').style.width = (inLevel*10)+'%';
+  $('streak').textContent = streak();
+
+  // дата
+  const today = new Date();
+  if(isSameDay(viewDate,today)) $('dateLabel').textContent='Сегодня';
+  else if(isSameDay(viewDate,addDays(today,-1))) $('dateLabel').textContent='Вчера';
+  else $('dateLabel').textContent = viewDate.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+  $('dateSub').textContent = viewDate.toLocaleDateString('ru-RU',{weekday:'long'});
+
+  // задачи дня
+  const key = dkey(viewDate);
+  const day = data.log[key] || {};
+  let doneCount=0;
+  const tasksEl = $('tasks');
+  tasksEl.innerHTML='';
+
+  if(data.tasks.length===0){
+    tasksEl.innerHTML='<div class="empty">Нет задач. Добавь первую ниже 👇</div>';
+  }
+
+  data.tasks.forEach(t=>{
+    const state = day[t.id]; // undefined | 'done' | 'skip'
+    if(state==='done') doneCount++;
+    const el = document.createElement('div');
+    el.className='task'+(state==='done'?' done':'')+(state==='skip'?' skipped':'');
+    el.innerHTML = `
+      <div class="ico">${t.icon||'⭐'}</div>
+      <div class="body">
+        <div class="name">${escapeHtml(t.name)}</div>
+        <div class="pts"><span class="plus">+${PTS_DONE}</span> за ✓ · <span class="minus">${PTS_SKIP}</span> за ✗</div>
+      </div>
+      <div class="check" data-id="${t.id}">${state==='done'?'✓':(state==='skip'?'✕':'')}</div>
+      <button class="del" data-del="${t.id}">🗑</button>
+    `;
+    tasksEl.appendChild(el);
+  });
+  $('todayDone').textContent = (function(){
+    const td=data.log[dkey(today)]||{}; let c=0; for(const id in td) if(td[id]==='done')c++; return c;
+  })();
+
+  renderWeek();
+}
+
+function renderWeek(){
+  const wk = $('week');
+  wk.innerHTML='';
+  const today=new Date();
+  const labels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  // последние 7 дней
+  const days=[];
+  for(let i=6;i>=0;i--) days.push(addDays(today,-i));
+  // макс для нормализации высоты
+  let maxAbs=1;
+  days.forEach(d=>{ maxAbs=Math.max(maxAbs, Math.abs(dayPoints(dkey(d)))); });
+  days.forEach(d=>{
+    const p=dayPoints(dkey(d));
+    const h=Math.min(100, Math.round(Math.abs(p)/maxAbs*100));
+    const dd=document.createElement('div');
+    dd.className='day'+(isSameDay(d,today)?' today':'');
+    const dow=(d.getDay()+6)%7;
+    dd.innerHTML=`<div class="d">${labels[dow]}</div><div class="bar"><i style="height:${p>0?h:0}%;${p<0?'background:linear-gradient(180deg,#fb7185,#f43f5e)':''}"></i></div>`;
+    wk.appendChild(dd);
+  });
+}
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* ================= Действия ================= */
+function cycleTask(id){
+  const key=dkey(viewDate);
+  if(!data.log[key]) data.log[key]={};
+  const cur=data.log[key][id];
+  let next, msg;
+  if(cur===undefined){ next='done'; msg=`+${PTS_DONE} очко · отлично! 💪`; }
+  else if(cur==='done'){ next='skip'; msg=`${PTS_SKIP} очка · пропуск`; }
+  else { next=undefined; msg='Сброшено'; }
+  if(next===undefined) delete data.log[key][id];
+  else data.log[key][id]=next;
+  if(Object.keys(data.log[key]).length===0) delete data.log[key];
+  save(); render(); toast(msg);
+  if(navigator.vibrate) navigator.vibrate(next==='done'?15:8);
+}
+
+function addTask(name){
+  name=name.trim();
+  if(!name) return;
+  const icons=['⭐','🎯','📚','🧘','💼','🏃','🥦','☀️','🛏️','✍️'];
+  data.tasks.push({id:'u'+Date.now(), name, icon:icons[data.tasks.length%icons.length]});
+  save(); render(); toast('Задача добавлена');
+}
+
+function delTask(id){
+  data.tasks=data.tasks.filter(t=>t.id!==id);
+  // также убираем из логов
+  for(const k in data.log){ if(data.log[k][id]!==undefined){ delete data.log[k][id]; } }
+  save(); render(); toast('Задача удалена');
+}
+
+let toastTimer;
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),1600);
+}
+
+/* ================= События ================= */
+$('tasks').addEventListener('click',e=>{
+  const chk=e.target.closest('.check');
+  if(chk){ cycleTask(chk.dataset.id); return; }
+  const del=e.target.closest('.del');
+  if(del){ if(confirm('Удалить задачу?')) delTask(del.dataset.del); }
+});
+$('addBtn').addEventListener('click',()=>{ const i=$('newTask'); addTask(i.value); i.value=''; });
+$('newTask').addEventListener('keydown',e=>{ if(e.key==='Enter'){ addTask(e.target.value); e.target.value=''; } });
+$('prevDay').addEventListener('click',()=>{ viewDate=addDays(viewDate,-1); render(); });
+$('nextDay').addEventListener('click',()=>{ if(!isSameDay(viewDate,new Date())){ viewDate=addDays(viewDate,1); render(); } });
+$('resetDay').addEventListener('click',()=>{ if(confirm('Сбросить отметки за этот день?')){ delete data.log[dkey(viewDate)]; save(); render(); toast('День сброшен'); } });
+$('resetAll').addEventListener('click',()=>{ if(confirm('Удалить ВСЮ историю и очки? Это нельзя отменить.')){ data.log={}; save(); render(); toast('Всё сброшено'); } });
+
+render();
+</script>
+</body>
+</html>
